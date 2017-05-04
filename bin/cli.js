@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const argv = require('optimist').argv
 const command = argv._[0]
 
