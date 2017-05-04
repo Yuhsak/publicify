@@ -1,0 +1,28 @@
+{
+  "name": "publicify",
+  "version": "0.0.1",
+  "description": "",
+  "bin": "bin/cli.js",
+  "scripts": {
+    "start": "",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Yuhsak/publicify.git"
+  },
+  "author": "Yuhsak Inoue",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Yuhsak/publicify/issues"
+  },
+  "homepage": "https://github.com/Yuhsak/publicify#readme",
+  "dependencies": {
+    "optimist": "^0.6.1",
+    "request": "^2.81.0",
+    "shortid": "^2.2.8",
+    "socket.io": "^1.7.3",
+    "socket.io-client": "^1.7.3",
+    "socket.io-stream": "^0.9.1"
+  }
+}
