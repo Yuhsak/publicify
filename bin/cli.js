@@ -1,12 +1,50 @@
 #!/usr/bin/env node
 
-const argv = require('optimist').argv
-const command = argv._[0]
+const cli = require('commander')
 
-if (command == 'server') {
-	const server = require(`${__dirname}/../server`)
-	server(argv._[1])
-} else if (command == 'client') {
-	const client = require(`${__dirname}/../client`)
-	client(argv._[1], argv._[2])
+cli
+	.version(require(`${__dirname}/../package.json`).version)
+	.on('--help', () => {
+		console.log('  Examples:');
+		console.log();
+		console.log('    $ publicify server 3000');
+		console.log('    $ publicify client ysk.im:3000 localhost:8000');
+		console.log();
+	})
+
+cli
+	.command('server <port>')
+	.description('Starts the remote server')
+	.option("-l, --log", "Show server access log on stdout")
+	.action((port, options) => {
+		require(`${__dirname}/../server`)({port, log: options.log})
+	})
+	.on('--help', () => {
+		console.log('  Example:');
+		console.log();
+		console.log('    $ publicify server 3000 --log');
+		// console.log('    $ deploy exec async');
+		console.log();
+	})
+	
+cli
+	.command('client <remotehost> <localhost>')
+	.description('Proxy access for server to local')
+	.option('-l, --log', 'Show access log on stdout')
+	.action((remotehost, localhost, options) => {
+		// console.log(remotehost, localhost)
+		require(`${__dirname}/../client`)({remote: remotehost, local: localhost, log: options.log})
+	})
+	.on('--help', () => {
+		console.log('  Example:');
+		console.log();
+		console.log('    $ publicify client ysk.im:3000 localhost:8000 --log');
+		// console.log('    $ publicify client https://ysk.im:3000 https://localhost:8000 --log');
+		console.log();
+	})
+
+cli.parse(process.argv)
+
+if (!process.argv.slice(2).length) {
+	cli.outputHelp()
 }

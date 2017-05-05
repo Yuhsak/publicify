@@ -3,8 +3,8 @@ const iostream = require('socket.io-stream')
 const http = require('http')
 const fs = require('fs')
 const shortid = require('shortid')
-const moment = require('moment')
 const colors = require('colors')
+const now = require(`${__dirname}/util/now`)
 const sockets = {}
 
 const render = ({statusCode=503, title, text, res}={}) => {
@@ -22,15 +22,15 @@ const ipValue = (ipaddr) => {
 	return (ipaddr.match(/.+:(.*?)$/) || [null, ipaddr])[1]
 }
 
-module.exports = (port) => {
+module.exports = ({port, log}) => {
 
 	const app = http.createServer((req, res) => {
 		
-		const ip = [ipValue(req.connection.remoteAddress || req.socket.remoteAddress || 'unknown')]
+		const requestIp = [ipValue(req.connection.remoteAddress || req.socket.remoteAddress || 'unknown')]
 			.map(ip => ip == '1' ? '127.0.0.1' : ip)[0]
-		const date = moment().format('ddd MMM DD YYYY kk:mm:ss.SSS Z')
-		const _request = colors.blue(`"${req.method} ${req.url}"`)
-		console.log(`[${date}] ${ip} ${_request} "${req.headers['user-agent']}"`)
+		const _ip = colors.blue(`"${requestIp}"`)
+		const _request = colors.cyan(`"${req.method} ${req.url}"`)
+		if (log) console.log(`[${now()}] ${_ip} ${_request} "${req.headers['user-agent']}"`)
 		
 		if (!sockets.primary) {
 			render({
@@ -45,11 +45,11 @@ module.exports = (port) => {
 		iostream(sockets.primary).once(emitTarget, (stream, data, param) => {
 			if (param.error) {
 				const errorTitle = `Error: ${param.errorCode}.`
-				const errorText = `Server received an error from client.`
-				console.log(`${errorTitle} ${errorText}`)
+				const errorText = `Server received an error from client`
+				console.error(`[${now()}] ${colors.red(errorTitle)} ${errorText}`)
 				render({
 					title: errorTitle,
-					text: `${errorTitle}<br />${errorText}`,
+					text: `<span style='color: red'>${errorTitle}</span><br />${errorText}.`,
 					res
 				})
 				return
@@ -59,29 +59,29 @@ module.exports = (port) => {
 		})
 		
 		const requestStream = iostream.createStream()
-		iostream(sockets.primary).emit('request', requestStream, {url: req.url,  method: req.method, headers: req.headers, emitTarget})
+		iostream(sockets.primary).emit('request', requestStream, {url: req.url,  method: req.method, headers: req.headers, requestIp, emitTarget})
 		req.pipe(requestStream)
 		
 	})
 
 	const _port = port || 3000
 	const server = app.listen(_port, () => {
-		console.log(`Publicify server has started.\nNow it's listening on port ${_port}.`)
+		console.log(`Publicify server has started.\nNow it's listening on port ${colors.cyan(_port)}`)
 	})
 	const io = require('socket.io').listen(server)
 
 	io.on('connect', socket => {
+		const clientIp = (socket.conn.remoteAddress.match(/.+:(.*?)$/) || [null, socket.conn.remoteAddress])[1]
 		if (!sockets.primary) {
 			socket.on('disconnect', () => {
-				console.log('Client disconnected.')
+				console.log(`[${now()}] Client disconnected.`)
 				sockets.primary = null
 			})
 			sockets.primary = socket
-			const clientIp = (socket.conn.remoteAddress.match(/.+:(.*?)$/) || [null, socket.conn.remoteAddress])[1]
-			console.log(`Client connected from ${clientIp}.`)
+			console.log(`[${now()}] Client connected from ${colors.cyan(clientIp)}`)
 		} else {
 			socket.disconnect()
-			console.log('Client had tried to connect, but disconnected by server while a connection already exists.')
+			console.log(`[${now()}] Client had tried to connect from ${colors.red(clientIp)}, but disconnected by server while a connection already exists`)
 		}
 	})
 

@@ -1,6 +1,6 @@
 {
   "name": "publicify",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "description": "",
   "bin": "bin/cli.js",
   "scripts": {
@@ -19,8 +19,8 @@
   "homepage": "https://github.com/Yuhsak/publicify#readme",
   "dependencies": {
     "colors": "^1.1.2",
+    "commander": "^2.9.0",
     "moment": "^2.18.1",
-    "optimist": "^0.6.1",
     "request": "^2.81.0",
     "shortid": "^2.2.8",
     "socket.io": "^1.7.3",
