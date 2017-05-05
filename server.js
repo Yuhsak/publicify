@@ -13,7 +13,6 @@ module.exports = (port) => {
 			res.statusCode = 404
 			res.statusMessage = http.STATUS_CODES[res.statusCode]
 			fs.createReadStream(`${__dirname}/noclient.html`).pipe(res)
-			// res.end(res.statusCode + ' ' + http.STATUS_CODES[res.statusCode])
 			return
 		}
 		

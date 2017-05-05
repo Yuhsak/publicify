@@ -4,7 +4,18 @@ const ioclient = require('socket.io-client')
 
 module.exports = (remote, local) => {
 	
-	const client = ioclient(`http://${remote}`)
+	const startsWithProtocol = new RegExp(/^https?:\/\//)
+	const isSSL = new RegExp(/^https/)
+	
+	const hosts = {remote, local}
+	Object.keys(hosts).forEach(key => {
+		hosts[key] = {
+			url: startsWithProtocol.test(hosts[key]) ? hosts[key] : `http://${hosts[key]}`,
+			isSSL: isSSL.test(hosts[key])
+		}
+	})
+	
+	const client = ioclient(hosts.remote.url)
 
 	client.on('connect', () => {
 		console.log('connected')
@@ -15,9 +26,12 @@ module.exports = (remote, local) => {
 	})
 
 	iostream(client).on('request', (stream, data) => {
-		// data.headers.host = local.replace(/https?:\/\//, '')
+		if (hosts.local.isSSL) {
+			data.headers.host = hosts.local.url.replace(startsWithProtocol, '')
+			process.env.NODE_TLS_REJECT_UNAUTHORIZED = 0
+		}
 		const requestStream = stream.pipe(rq(Object.assign(data, {
-			url: `http://${local}${data.url}`
+			url: `${hosts.local.url}${data.url}`
 		})))
 		const responseStream = iostream.createStream()
 		requestStream.on('response', response => {
