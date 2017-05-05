@@ -15,9 +15,16 @@ cli
 cli
 	.command('server <port>')
 	.description('Starts the remote server')
+	// .option("-a, --basicAuth <username:password>", "Set basic authentification", val => {const b = val.split(':'); return {user:b[0],pass:b[1]}})
+	.option("-p, --clientPass <password>", "Set password for publicify client")
 	.option("-l, --log", "Show server access log on stdout")
 	.action((port, options) => {
-		require(`${__dirname}/../server`)({port, log: options.log})
+		require(`${__dirname}/../server`)({
+			port,
+			log: options.log,
+			pass: options.clientPass,
+			// basicAuth: options.basicAuth
+		})
 	})
 	.on('--help', () => {
 		console.log('  Example:');
@@ -30,10 +37,15 @@ cli
 cli
 	.command('client <remotehost> <localhost>')
 	.description('Proxy access for server to local')
+	.option('-p, --clientPass <password>', 'Set password for client')
 	.option('-l, --log', 'Show access log on stdout')
 	.action((remotehost, localhost, options) => {
-		// console.log(remotehost, localhost)
-		require(`${__dirname}/../client`)({remote: remotehost, local: localhost, log: options.log})
+		require(`${__dirname}/../client`)({
+			remote: remotehost,
+			local: localhost,
+			log: options.log,
+			pass: options.clientPass
+		})
 	})
 	.on('--help', () => {
 		console.log('  Example:');

@@ -22,7 +22,7 @@ const ipValue = (ipaddr) => {
 	return (ipaddr.match(/.+:(.*?)$/) || [null, ipaddr])[1]
 }
 
-module.exports = ({port, log}) => {
+module.exports = ({port, log, pass}) => {
 
 	const app = http.createServer((req, res) => {
 		
@@ -67,18 +67,28 @@ module.exports = ({port, log}) => {
 	const _port = port || 3000
 	const server = app.listen(_port, () => {
 		console.log(`Publicify server has started.\nNow it's listening on port ${colors.cyan(_port)}`)
+		if (pass) console.log(`Password authentication is enabled. waiting for auth`)
 	})
 	const io = require('socket.io').listen(server)
 
 	io.on('connect', socket => {
 		const clientIp = (socket.conn.remoteAddress.match(/.+:(.*?)$/) || [null, socket.conn.remoteAddress])[1]
 		if (!sockets.primary) {
-			socket.on('disconnect', () => {
-				console.log(`[${now()}] Client disconnected.`)
-				sockets.primary = null
+			socket.once('auth', data => {
+				if (pass && pass != data.pass) {
+					socket.emit('authResult', {success: false})
+					socket.disconnect()
+					console.log(`[${now()}] Client had tried to connect from ${colors.red(clientIp)}, but disconnected by server while a clientPass was invalid`)
+				} else {
+					socket.on('disconnect', () => {
+						console.log(`[${now()}] Client disconnected.`)
+						sockets.primary = null
+					})
+					socket.emit('authResult', {success: true})
+					sockets.primary = socket
+					console.log(`[${now()}] Client connected from ${colors.cyan(clientIp)}`)
+				}
 			})
-			sockets.primary = socket
-			console.log(`[${now()}] Client connected from ${colors.cyan(clientIp)}`)
 		} else {
 			socket.disconnect()
 			console.log(`[${now()}] Client had tried to connect from ${colors.red(clientIp)}, but disconnected by server while a connection already exists`)

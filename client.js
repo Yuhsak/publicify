@@ -4,7 +4,7 @@ const ioclient = require('socket.io-client')
 const colors = require('colors')
 const now = require(`${__dirname}/util/now`)
 
-module.exports = ({remote, local, log}) => {
+module.exports = ({remote, local, log, pass}) => {
 	
 	const startsWithProtocol = new RegExp(/^https?:\/\//)
 	const isSSL = new RegExp(/^https/)
@@ -20,7 +20,14 @@ module.exports = ({remote, local, log}) => {
 	const client = ioclient(hosts.remote.url)
 
 	client.on('connect', () => {
-		console.log(`[${now()}] Connected. Proxying ${colors.cyan(hosts.remote.url)} => ${colors.cyan(hosts.local.url)}`)
+		client.once('authResult', data => {
+			if (data.success) {
+				console.log(`[${now()}] Connected. Proxying ${colors.cyan(hosts.remote.url)} => ${colors.cyan(hosts.local.url)}`)
+			} else {
+				console.log(`[${now()}] ${colors.red('Invalid clientPass')}`)
+			}
+		})
+		client.emit('auth', {pass})
 	})
 
 	client.on('disconnect', () => {
