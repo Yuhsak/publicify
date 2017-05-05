@@ -1,10 +1,12 @@
 {
   "name": "publicify",
-  "version": "0.1.0",
-  "description": "",
+  "version": "0.1.1",
+  "description": "Publish your localhost in seconds.",
   "bin": "bin/cli.js",
   "scripts": {
-    "start": "",
+    "start": "node ./bin/cli.js",
+    "server": "node ./bin/cli.js server 8001 --log",
+    "client": "node ./bin/cli.js client localhost:8001 localhost:8000 --log",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
