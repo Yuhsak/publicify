@@ -3,6 +3,8 @@ const iostream = require('socket.io-stream')
 const http = require('http')
 const fs = require('fs')
 const shortid = require('shortid')
+const moment = require('moment')
+const colors = require('colors')
 const sockets = {}
 
 const render = ({statusCode=503, title, text, res}={}) => {
@@ -16,6 +18,7 @@ const render = ({statusCode=503, title, text, res}={}) => {
 }
 
 const ipValue = (ipaddr) => {
+	if (ipaddr == 'unknown') return ipaddr
 	return (ipaddr.match(/.+:(.*?)$/) || [null, ipaddr])[1]
 }
 
@@ -23,8 +26,11 @@ module.exports = (port) => {
 
 	const app = http.createServer((req, res) => {
 		
-		const ip = ipValue(req.connection.remoteAddress || req.socket.remoteAddress)
-		console.log(`${ip} ${req.method} ${req.url} ${req.headers['user-agent']}`)
+		const ip = [ipValue(req.connection.remoteAddress || req.socket.remoteAddress || 'unknown')]
+			.map(ip => ip == '1' ? '127.0.0.1' : ip)[0]
+		const date = moment().format('ddd MMM DD YYYY kk:mm:ss.SSS Z')
+		const _request = colors.blue(`"${req.method} ${req.url}"`)
+		console.log(`[${date}] ${ip} ${_request} "${req.headers['user-agent']}"`)
 		
 		if (!sockets.primary) {
 			render({
