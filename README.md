@@ -27,12 +27,14 @@ publicify server <port>
 If 3000, the command is going to be
 
 ```sh
-publicify server 3000
+$ publicify server 3000
+Publicify server has started.
+Now it's listening on port 3000
 ```
 
-Then access http://\<your-servers-hostname>:3000 to make sure that server has started.
+Then access http://\<your-servers-hostname>:3000 to make sure that the server has successfully started and can receive requests.
 
-If you see the screen like this, server is now ready.
+If you see the screen like this, server is ready.
 
 ![](noclient.png)
 
@@ -49,7 +51,12 @@ publicify client <remotehost> <localhost>
 If your server's hostname is ysk.im and want to publish http://localhost:8000, the command is going to be
 
 ```sh
-publicify client ysk.im:3000 localhost:8000
+$ publicify client ysk.im:3000 localhost:8000
+Connected. Proxying http://ysk.im:3000 => http://localhost:8000
 ```
 
 3\. That's all. Now you can access your http://localhost:8000 by http://ysk.im:3000.
+
+## Options
+
+**-l, --log** - Displays access log on stdout. Available in both server and client.
