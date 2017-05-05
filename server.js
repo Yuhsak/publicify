@@ -17,7 +17,14 @@ module.exports = (port) => {
 		}
 		
 		const emitTarget = shortid.generate()
-		iostream(sockets.primary).once(emitTarget, (stream, data) => {
+		iostream(sockets.primary).once(emitTarget, (stream, data, param) => {
+			if (param.error) {
+				console.log(`Error: ${param.errorCode}. Server received error response from client.`)
+				res.statusCode = 404
+				res.statusMessage = http.STATUS_CODES[res.statusCode]
+				res.end('Client error')
+				return
+			}
 			res.writeHead(data.statusCode, data.headers)
 			stream.pipe(res)
 		})
