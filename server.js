@@ -64,7 +64,8 @@ module.exports = (port) => {
 				sockets.primary = null
 			})
 			sockets.primary = socket
-			console.log(`Client connected from ${socket.conn.remoteAddress}`)
+			const clientIp = (socket.conn.remoteAddress.match(/.+:(.*?)$/) || [null, socket.conn.remoteAddress])[1]
+			console.log(`Client connected from ${clientIp}.`)
 		} else {
 			socket.disconnect()
 			console.log('Client had tried to connect, but disconnected by server while a connection already exists.')

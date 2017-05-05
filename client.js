@@ -18,7 +18,7 @@ module.exports = (remote, local) => {
 	const client = ioclient(hosts.remote.url)
 
 	client.on('connect', () => {
-		console.log(`Connected to ${hosts.remote.url}`)
+		console.log(`Connected. Proxying ${hosts.remote.url} => ${hosts.local.url}`)
 	})
 
 	client.on('disconnect', () => {
