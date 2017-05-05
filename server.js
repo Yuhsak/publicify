@@ -15,24 +15,16 @@ const render = ({statusCode=503, title, text, res}={}) => {
 	return
 }
 
+const ipValue = (ipaddr) => {
+	return (ipaddr.match(/.+:(.*?)$/) || [null, ipaddr])[1]
+}
+
 module.exports = (port) => {
 
 	const app = http.createServer((req, res) => {
 		
-		console.log(req.headers)
-		console.log('-----')
-		const ip = req.headers['x-forwarded-for'] || 
-					req.connection.remoteAddress || 
-					req.socket.remoteAddress ||
-					req.connection.socket.remoteAddress
-		console.log(ip)
-		console.log('-----')
-		console.log(req.headers['x-forwarded-for'])
-		console.log(req.connection.remoteAddress)
-		console.log(req.socket.remoteAddress)
-		console.log(req.connection.socket.remoteAddress)
-		console.log('-----')
-		console.log(`${req.connection.remoteAddress} ${req.method} ${req.url} ${req.headers['user-agent']}`)
+		const ip = ipValue(req.connection.remoteAddress || req.socket.remoteAddress)
+		console.log(`${ip} ${req.method} ${req.url} ${req.headers['user-agent']}`)
 		
 		if (!sockets.primary) {
 			render({
