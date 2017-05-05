@@ -26,7 +26,7 @@ module.exports = ({port, log}) => {
 
 	const app = http.createServer((req, res) => {
 		
-		const requestIp = [ipValue(req.connection.remoteAddress || req.socket.remoteAddress || 'unknown')]
+		const requestIp = [ipValue(req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress || 'unknown')]
 			.map(ip => ip == '1' ? '127.0.0.1' : ip)[0]
 		const _ip = colors.blue(`"${requestIp}"`)
 		const _request = colors.cyan(`"${req.method} ${req.url}"`)
