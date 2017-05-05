@@ -18,11 +18,11 @@ module.exports = (remote, local) => {
 	const client = ioclient(hosts.remote.url)
 
 	client.on('connect', () => {
-		console.log('connected')
+		console.log(`Connected to ${hosts.remote.url}`)
 	})
 
 	client.on('disconnect', () => {
-		console.log('disconnected')
+		console.log(`Disconnected from ${hosts.remote.url}`)
 	})
 
 	iostream(client).on('request', (stream, data) => {

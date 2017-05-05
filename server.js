@@ -5,24 +5,40 @@ const fs = require('fs')
 const shortid = require('shortid')
 const sockets = {}
 
+const render = ({statusCode=503, title, text, res}={}) => {
+	const template = fs.readFileSync(`${__dirname}/template.html`, 'utf-8')
+	const _title = `Publicify | ${title ? title : http.STATUS_CODES[statusCode]}`
+	const _text = text ? text : `${statusCode} ${http.STATUS_CODES[statusCode]}`
+	const view = template.replace('{title}', _title).replace('{text}', _text)
+	res.writeHead(statusCode, http.STATUS_CODES[statusCode], {'Content-Type': 'text/html'})
+	res.end(view)
+	return
+}
+
 module.exports = (port) => {
 
 	const app = http.createServer((req, res) => {
 		
 		if (!sockets.primary) {
-			res.statusCode = 404
-			res.statusMessage = http.STATUS_CODES[res.statusCode]
-			fs.createReadStream(`${__dirname}/noclient.html`).pipe(res)
+			render({
+				title: 'Welcome to Publicify!',
+				text: 'Oops, there is no client connected yet.',
+				res
+			})
 			return
 		}
 		
 		const emitTarget = shortid.generate()
 		iostream(sockets.primary).once(emitTarget, (stream, data, param) => {
 			if (param.error) {
-				console.log(`Error: ${param.errorCode}. Server received error response from client.`)
-				res.statusCode = 404
-				res.statusMessage = http.STATUS_CODES[res.statusCode]
-				res.end('Client error')
+				const errorTitle = `Error: ${param.errorCode}.`
+				const errorText = `Server received an error from client.`
+				console.log(`${errorTitle} ${errorText}`)
+				render({
+					title: errorTitle,
+					text: `${errorTitle}<br />${errorText}`,
+					res
+				})
 				return
 			}
 			res.writeHead(data.statusCode, data.headers)
@@ -48,7 +64,7 @@ module.exports = (port) => {
 				sockets.primary = null
 			})
 			sockets.primary = socket
-			console.log('Client connected.')
+			console.log(`Client connected from ${socket.conn.remoteAddress}`)
 		} else {
 			socket.disconnect()
 			console.log('Client had tried to connect, but disconnected by server while a connection already exists.')
