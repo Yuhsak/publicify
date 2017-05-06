@@ -4,7 +4,7 @@ const ioclient = require('socket.io-client')
 const colors = require('colors')
 const now = require(`${__dirname}/util/now`)
 
-module.exports = ({remote, local, log, pass}) => {
+module.exports = ({remote, local, log, pass, index}) => {
 	
 	const startsWithProtocol = new RegExp(/^https?:\/\//)
 	const isSSL = new RegExp(/^https/)
@@ -41,8 +41,9 @@ module.exports = ({remote, local, log, pass}) => {
 		}
 		const responseStream = iostream.createStream()
 		const path = data.url
+		const realPath = index ? data.url.replace(/\/$/, `/${index}`) : data.url
 		const requestStream = stream.pipe(rq(Object.assign(data, {
-			url: `${hosts.local.url}${data.url}`
+			url: `${hosts.local.url}${realPath}`
 		})))
 		.on('response', response => {
 			const statusColor = [

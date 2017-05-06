@@ -79,7 +79,8 @@ module.exports = ({port, log, pass, basicAuth}) => {
 	const _port = port || 3000
 	const server = app.listen(_port, () => {
 		console.log(`Publicify server has started.\nNow it's listening on port ${colors.cyan(_port)}`)
-		if (pass) console.log(`Password authentication is enabled. waiting for auth`)
+		if (pass) console.log(`Basic authentication is enabled`)
+		if (pass) console.log(`Password authentication for client is enabled. waiting for auth`)
 	})
 	const io = require('socket.io').listen(server)
 

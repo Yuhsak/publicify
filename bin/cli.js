@@ -37,6 +37,7 @@ cli
 cli
 	.command('client <remotehost> <localhost>')
 	.description('Proxy access for server to local')
+	.option('-i, --indexFile <file>', 'Set index file when access to /')
 	.option('-p, --clientPass <password>', 'Set password for client')
 	.option('-l, --log', 'Show access log on stdout')
 	.action((remotehost, localhost, options) => {
@@ -44,7 +45,8 @@ cli
 			remote: remotehost,
 			local: localhost,
 			log: options.log,
-			pass: options.clientPass
+			pass: options.clientPass,
+			index: options.indexFile
 		})
 	})
 	.on('--help', () => {
