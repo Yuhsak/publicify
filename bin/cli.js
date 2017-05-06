@@ -27,10 +27,11 @@ cli
 		})
 	})
 	.on('--help', () => {
-		console.log('  Example:');
+		console.log('  Examples:');
 		console.log();
+		console.log('    $ publicify server 3000 --basicAuth testuser:testpass');
+		console.log('    $ publicify server 3000 --clientPass qwerty');
 		console.log('    $ publicify server 3000 --log');
-		// console.log('    $ deploy exec async');
 		console.log();
 	})
 	
@@ -50,10 +51,11 @@ cli
 		})
 	})
 	.on('--help', () => {
-		console.log('  Example:');
+		console.log('  Examples:');
 		console.log();
+		console.log('    $ publicify client ysk.im:3000 localhost:8000 --indexFile mypage.html');
+		console.log('    $ publicify client ysk.im:3000 localhost:8000 --clientPass qwerty');
 		console.log('    $ publicify client ysk.im:3000 localhost:8000 --log');
-		// console.log('    $ publicify client https://ysk.im:3000 https://localhost:8000 --log');
 		console.log();
 	})
 
