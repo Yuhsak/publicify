@@ -15,7 +15,7 @@ cli
 cli
 	.command('server <port>')
 	.description('Starts the remote server')
-	// .option("-a, --basicAuth <username:password>", "Set basic authentification", val => {const b = val.split(':'); return {user:b[0],pass:b[1]}})
+	.option("-a, --basicAuth <username:password>", "Set basic authentication", val => {const b = val.split(':'); return {user:b[0],pass:b[1]}})
 	.option("-p, --clientPass <password>", "Set password for publicify client")
 	.option("-l, --log", "Show server access log on stdout")
 	.action((port, options) => {
@@ -23,7 +23,7 @@ cli
 			port,
 			log: options.log,
 			pass: options.clientPass,
-			// basicAuth: options.basicAuth
+			basicAuth: options.basicAuth
 		})
 	})
 	.on('--help', () => {

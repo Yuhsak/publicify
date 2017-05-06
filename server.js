@@ -4,15 +4,16 @@ const http = require('http')
 const fs = require('fs')
 const shortid = require('shortid')
 const colors = require('colors')
+const auth = require('basic-auth')
 const now = require(`${__dirname}/util/now`)
 const sockets = {}
 
-const render = ({statusCode=503, title, text, res}={}) => {
+const render = ({statusCode=503, title, text, res, headers={}}={}) => {
 	const template = fs.readFileSync(`${__dirname}/template.html`, 'utf-8')
 	const _title = `Publicify | ${title ? title : http.STATUS_CODES[statusCode]}`
 	const _text = text ? text : `${statusCode} ${http.STATUS_CODES[statusCode]}`
 	const view = template.replace('{title}', _title).replace('{text}', _text)
-	res.writeHead(statusCode, http.STATUS_CODES[statusCode], {'Content-Type': 'text/html'})
+	res.writeHead(statusCode, http.STATUS_CODES[statusCode], Object.assign(headers, {'Content-Type': 'text/html'}))
 	res.end(view)
 	return
 }
@@ -22,7 +23,7 @@ const ipValue = (ipaddr) => {
 	return (ipaddr.match(/.+:(.*?)$/) || [null, ipaddr])[1]
 }
 
-module.exports = ({port, log, pass}) => {
+module.exports = ({port, log, pass, basicAuth}) => {
 
 	const app = http.createServer((req, res) => {
 		
@@ -31,6 +32,17 @@ module.exports = ({port, log, pass}) => {
 		const _ip = colors.blue(`"${requestIp}"`)
 		const _request = colors.cyan(`"${req.method} ${req.url}"`)
 		if (log) console.log(`[${now()}] ${_ip} ${_request} "${req.headers['user-agent']}"`)
+		
+		const credentials = auth(req) || {name:'unknown', pass:'unknown'}
+		if (basicAuth && (!credentials||credentials.name!==basicAuth.user||credentials.pass!==basicAuth.pass)) {
+			if (log) console.log(`[${now()}] ${_ip} ${colors.red('"'+req.method+' '+req.url+' '+'401 Unauthorized'+'"')} "${credentials.name}:${credentials.pass}" "${req.headers['user-agent']}"`)
+			render({
+				statusCode: 401,
+				headers: {'WWW-Authenticate': 'Basic realm="Publicify authentication"'},
+				res
+			})
+			return
+		}
 		
 		if (!sockets.primary) {
 			render({

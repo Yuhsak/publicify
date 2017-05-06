@@ -1,6 +1,6 @@
 {
   "name": "publicify",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "Publish your localhost in seconds.",
   "bin": "bin/cli.js",
   "scripts": {
@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/Yuhsak/publicify#readme",
   "dependencies": {
+    "basic-auth": "^1.1.0",
     "colors": "^1.1.2",
     "commander": "^2.9.0",
     "moment": "^2.18.1",
