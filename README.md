@@ -29,7 +29,7 @@ If 3000, the command is going to be
 ```sh
 $ publicify server 3000
 Publicify server has started.
-Now it's listening on port 3000
+Now it is listening on port 3000
 ```
 
 Then access http://\<your-servers-hostname>:3000 to make sure that the server has successfully started and can receive requests.
@@ -59,4 +59,32 @@ Connected. Proxying http://ysk.im:3000 => http://localhost:8000
 
 ## Options
 
-**-l, --log** - Displays access log on stdout. Available in both server and client.
+### Server
+
+**-a, --basicAuth \<username:password>** - Enable basic authentication
+
+**-p, --clientPass \<password>** - Enable password authentication for client
+
+**-l, --log** - Displays access logs on stdout
+
+```sh
+# For example
+publicify server 3000 -a testuser:testpass -p qwerty -l
+```
+
+### Client
+
+**-i, --indexFile** - Specify index file when access to /$
+
+**-p, --clientPass \<password>** - Set password for authentication
+
+**-l, --log** - Displays access logs on stdout
+
+```sh
+# For example
+publicify client ysk.im:3000 localhost:8000 -i mypage.html -p qwerty -l
+```
+
+## License
+
+[MIT](LICENSE)
