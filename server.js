@@ -33,8 +33,6 @@ module.exports = ({port, log, agentAuth, basicAuth}) => {
 		const _request = colors.cyan(`"${req.method} ${req.url}"`)
 		if (log) console.log(`[${now()}] ${_ip} ${_request} "${req.headers['user-agent']}"`)
 		
-		console.log(req.headers)
-		
 		const credentials = auth(req) || {name:'unknown', pass:'unknown'}
 		if (basicAuth && (!credentials||credentials.name!==basicAuth.user||credentials.pass!==basicAuth.pass)) {
 			if (log) console.log(`[${now()}] ${_ip} ${colors.red('"'+req.method+' '+req.url+' '+'401 Unauthorized'+'"')} "${credentials.name}:${credentials.pass}" "${req.headers['user-agent']}"`)

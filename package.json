@@ -1,6 +1,6 @@
 {
   "name": "publicify",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "Publish your localhost in seconds.",
   "bin": "bin/cli.js",
   "scripts": {
