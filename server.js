@@ -23,7 +23,7 @@ const ipValue = (ipaddr) => {
 	return (ipaddr.match(/.+:(.*?)$/) || [null, ipaddr])[1]
 }
 
-module.exports = ({port, log, clientAuth, basicAuth}) => {
+module.exports = ({port, log, agentAuth, basicAuth}) => {
 
 	const app = http.createServer((req, res) => {
 		
@@ -82,14 +82,14 @@ module.exports = ({port, log, clientAuth, basicAuth}) => {
 	const server = app.listen(_port, () => {
 		console.log(`Publicify server has started.\nNow it's listening on port ${colors.cyan(_port)}`)
 		if (basicAuth) console.log(`Basic authentication is enabled`)
-		if (clientAuth) console.log(`Basic authentication for client is enabled`)
+		if (agentAuth) console.log(`Basic authentication for client is enabled`)
 	})
 	const io = require('socket.io').listen(server)
 
 	io.use((socket, next) => {
 		const clientIp = socket.handshake.headers['x-forwarded-for'] || ipValue(socket.conn.remoteAddress)
 		const credentials = auth(socket.handshake)
-		if (clientAuth && (!credentials||clientAuth.user != credentials.name || clientAuth.pass != credentials.pass)) {
+		if (agentAuth && (!credentials||agentAuth.user != credentials.name || agentAuth.pass != credentials.pass)) {
 			next(new Error('Authentication failed'))
 			console.log(`[${now()}] Client had tried to connect from ${colors.red(clientIp)}, but disconnected by server while the client had invalid basic authentication header`)
 			return

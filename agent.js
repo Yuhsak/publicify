@@ -4,7 +4,7 @@ const ioclient = require('socket.io-client')
 const colors = require('colors')
 const now = require(`${__dirname}/util/now`)
 
-module.exports = ({remote, local, log, clientAuth, index}) => {
+module.exports = ({remote, local, log, agentAuth, index}) => {
 	
 	const startsWithProtocol = new RegExp(/^https?:\/\//)
 	const isSSL = new RegExp(/^https/)
@@ -18,8 +18,8 @@ module.exports = ({remote, local, log, clientAuth, index}) => {
 	})
 	
 	const client = ioclient(hosts.remote.url, {
-		extraHeaders: clientAuth ? {
-			Authorization: `Basic ${new Buffer(clientAuth).toString('base64')}`
+		extraHeaders: agentAuth ? {
+			Authorization: `Basic ${new Buffer(agentAuth).toString('base64')}`
 		} : {}
 	}).on('error', (err) => {
 		console.error(`[${now()}] An error was sent from server: ${colors.red(err)}`)

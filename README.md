@@ -41,7 +41,7 @@ If you see the screen like this, server is ready.
 2\. Run command below on your **local machine**.
 
 ```sh
-publicify client <remotehost> <localhost>
+publicify agent <remotehost> <localhost>
 ```
 
 \<remotehost> is a hostname or ipaddress and port on which you started publicify server.
@@ -51,7 +51,7 @@ publicify client <remotehost> <localhost>
 If your server's hostname is ysk.im and want to publish http://localhost:8000, the command is going to be
 
 ```sh
-$ publicify client ysk.im:3000 localhost:8000
+$ publicify agent ysk.im:3000 localhost:8000
 Connected. Proxying http://ysk.im:3000 => http://localhost:8000
 ```
 
@@ -63,26 +63,26 @@ Connected. Proxying http://ysk.im:3000 => http://localhost:8000
 
 **-b, --basicAuth \<username:password>** - Enable basic authentication
 
-**-c, --clientAuth \<username:password>** - Enable basic authentication for client
+**-a, --agentAuth \<username:password>** - Enable basic authentication for agent
 
 **-l, --log** - Displays access logs on stdout
 
 ```sh
 # For example
-publicify server 3000 -b testUser:testPass -c clientUser:clientPass -l
+publicify server 3000 -b testUser:testPass -a agentUser:agentPass -l
 ```
 
 ### Client
 
 **-i, --indexFile** - Specify index file when access to /$
 
-**-c, --clientAuth \<username:password>** - Set basic authentication
+**-a, --agentAuth \<username:password>** - Set basic authentication
 
 **-l, --log** - Displays access logs on stdout
 
 ```sh
 # For example
-publicify client ysk.im:3000 localhost:8000 -i mypage.html -c clientUser:clientPass -l
+publicify agent ysk.im:3000 localhost:8000 -i mypage.html -a agentUser:agentPass -l
 ```
 
 ## License
