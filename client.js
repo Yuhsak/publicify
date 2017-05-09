@@ -4,7 +4,7 @@ const ioclient = require('socket.io-client')
 const colors = require('colors')
 const now = require(`${__dirname}/util/now`)
 
-module.exports = ({remote, local, log, pass, index}) => {
+module.exports = ({remote, local, log, clientAuth, index}) => {
 	
 	const startsWithProtocol = new RegExp(/^https?:\/\//)
 	const isSSL = new RegExp(/^https/)
@@ -17,17 +17,18 @@ module.exports = ({remote, local, log, pass, index}) => {
 		}
 	})
 	
-	const client = ioclient(hosts.remote.url)
+	const client = ioclient(hosts.remote.url, {
+		extraHeaders: clientAuth ? {
+			Authorization: `Basic ${new Buffer(clientAuth).toString('base64')}`
+		} : {}
+	}).on('error', (err) => {
+		console.error(`[${now()}] An error was sent from server: ${colors.red(err)}`)
+		client.disconnect()
+		process.exit()
+	})
 
 	client.on('connect', () => {
-		client.once('authResult', data => {
-			if (data.success) {
-				console.log(`[${now()}] Connected. Proxying ${colors.cyan(hosts.remote.url)} => ${colors.cyan(hosts.local.url)}`)
-			} else {
-				console.log(`[${now()}] ${colors.red('Invalid clientPass')}`)
-			}
-		})
-		client.emit('auth', {pass})
+		console.log(`[${now()}] Connected. Proxying ${colors.cyan(hosts.remote.url)} => ${colors.cyan(hosts.local.url)}`)
 	})
 
 	client.on('disconnect', () => {
@@ -51,8 +52,9 @@ module.exports = ({remote, local, log, pass, index}) => {
 				{re: /^2/, color: 'cyan'},
 				{re: /^3/, color: 'yellow'},
 				{re: /^4/, color: 'red'},
-				{re: /^5/, color: 'magenta'}
-			].map(item => Object.assign(item, {matched: item.re.test(response.statusCode)})).find(item => item.matched).color
+				{re: /^5/, color: 'magenta'},
+				{re: /^/, color: 'white'}
+			].find(item => item.re.test(response.statusCode)).color
 			if (log) console.log(`[${now()}] "${colors.blue(data.requestIp)}" ${colors[statusColor]('"'+data.method+' '+path+' '+response.statusCode+' '+response.statusMessage+'"')} "${data.headers['user-agent']}"`)
 			iostream(client).emit(data.emitTarget, responseStream, response.toJSON(), {error: false})
 			requestStream.pipe(responseStream)
@@ -66,6 +68,10 @@ module.exports = ({remote, local, log, pass, index}) => {
 
 	process.on('SIGINT', () => {
 		client.disconnect()
+	})
+	
+	process.on('uncaughtException', err => {
+		// console.error(err)
 	})
 
 }

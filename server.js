@@ -23,7 +23,7 @@ const ipValue = (ipaddr) => {
 	return (ipaddr.match(/.+:(.*?)$/) || [null, ipaddr])[1]
 }
 
-module.exports = ({port, log, pass, basicAuth}) => {
+module.exports = ({port, log, clientAuth, basicAuth}) => {
 
 	const app = http.createServer((req, res) => {
 		
@@ -32,6 +32,8 @@ module.exports = ({port, log, pass, basicAuth}) => {
 		const _ip = colors.blue(`"${requestIp}"`)
 		const _request = colors.cyan(`"${req.method} ${req.url}"`)
 		if (log) console.log(`[${now()}] ${_ip} ${_request} "${req.headers['user-agent']}"`)
+		
+		console.log(req.headers)
 		
 		const credentials = auth(req) || {name:'unknown', pass:'unknown'}
 		if (basicAuth && (!credentials||credentials.name!==basicAuth.user||credentials.pass!==basicAuth.pass)) {
@@ -79,29 +81,31 @@ module.exports = ({port, log, pass, basicAuth}) => {
 	const _port = port || 3000
 	const server = app.listen(_port, () => {
 		console.log(`Publicify server has started.\nNow it's listening on port ${colors.cyan(_port)}`)
-		if (pass) console.log(`Basic authentication is enabled`)
-		if (pass) console.log(`Password authentication for client is enabled. waiting for auth`)
+		if (basicAuth) console.log(`Basic authentication is enabled`)
+		if (clientAuth) console.log(`Basic authentication for client is enabled`)
 	})
 	const io = require('socket.io').listen(server)
+
+	io.use((socket, next) => {
+		const clientIp = socket.handshake.headers['x-forwarded-for'] || ipValue(socket.conn.remoteAddress)
+		const credentials = auth(socket.handshake)
+		if (clientAuth && (!credentials||clientAuth.user != credentials.name || clientAuth.pass != credentials.pass)) {
+			next(new Error('Authentication failed'))
+			console.log(`[${now()}] Client had tried to connect from ${colors.red(clientIp)}, but disconnected by server while the client had invalid basic authentication header`)
+			return
+		}
+		next()
+	})
 
 	io.on('connect', socket => {
 		const clientIp = socket.handshake.headers['x-forwarded-for'] || ipValue(socket.conn.remoteAddress)
 		if (!sockets.primary) {
-			socket.once('auth', data => {
-				if (pass && pass != data.pass) {
-					socket.emit('authResult', {success: false})
-					socket.disconnect()
-					console.log(`[${now()}] Client had tried to connect from ${colors.red(clientIp)}, but disconnected by server while a clientPass was invalid`)
-				} else {
-					socket.on('disconnect', () => {
-						console.log(`[${now()}] Client disconnected.`)
-						sockets.primary = null
-					})
-					socket.emit('authResult', {success: true})
-					sockets.primary = socket
-					console.log(`[${now()}] Client connected from ${colors.cyan(clientIp)}`)
-				}
+			socket.on('disconnect', () => {
+				console.log(`[${now()}] Client disconnected.`)
+				sockets.primary = null
 			})
+			sockets.primary = socket
+			console.log(`[${now()}] Client connected from ${colors.cyan(clientIp)}`)
 		} else {
 			socket.disconnect()
 			console.log(`[${now()}] Client had tried to connect from ${colors.red(clientIp)}, but disconnected by server while a connection already exists`)

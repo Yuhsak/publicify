@@ -61,28 +61,28 @@ Connected. Proxying http://ysk.im:3000 => http://localhost:8000
 
 ### Server
 
-**-a, --basicAuth \<username:password>** - Enable basic authentication
+**-b, --basicAuth \<username:password>** - Enable basic authentication
 
-**-p, --clientPass \<password>** - Enable password authentication for client
+**-c, --clientAuth \<username:password>** - Enable basic authentication for client
 
 **-l, --log** - Displays access logs on stdout
 
 ```sh
 # For example
-publicify server 3000 -a testuser:testpass -p qwerty -l
+publicify server 3000 -b testUser:testPass -c clientUser:clientPass -l
 ```
 
 ### Client
 
 **-i, --indexFile** - Specify index file when access to /$
 
-**-p, --clientPass \<password>** - Set password for authentication
+**-c, --clientAuth \<username:password>** - Set basic authentication
 
 **-l, --log** - Displays access logs on stdout
 
 ```sh
 # For example
-publicify client ysk.im:3000 localhost:8000 -i mypage.html -p qwerty -l
+publicify client ysk.im:3000 localhost:8000 -i mypage.html -c clientUser:clientPass -l
 ```
 
 ## License
