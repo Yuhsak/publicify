@@ -85,7 +85,7 @@ module.exports = ({port, log, pass, basicAuth}) => {
 	const io = require('socket.io').listen(server)
 
 	io.on('connect', socket => {
-		const clientIp = (socket.conn.remoteAddress.match(/.+:(.*?)$/) || [null, socket.conn.remoteAddress])[1]
+		const clientIp = socket.handshake.headers['x-forwarded-for'] || ipValue(socket.conn.remoteAddress)
 		if (!sockets.primary) {
 			socket.once('auth', data => {
 				if (pass && pass != data.pass) {
